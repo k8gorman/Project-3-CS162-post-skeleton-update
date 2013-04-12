@@ -51,16 +51,33 @@ public class KVServer implements KeyValueInterface {
 	public KVServer(int numSets, int maxElemsPerSet) {
 		dataStore = new KVStore();
 		dataCache = new KVCache(numSets, maxElemsPerSet);
-
+		
 		AutoGrader.registerKVServer(dataStore, dataCache);
 	}
 	
 	public void put(String key, String value) throws KVException {
 		// Must be called before anything else
 		AutoGrader.agKVServerPutStarted(key, value);
-
+		
 		// TODO: implement me
-
+		if(key.length() < this.MAX_KEY_SIZE){
+			//throw new KVException("Oversized key");
+		}
+		if(value.length() < this.MAX_VAL_SIZE){
+			//throw new KVException("Oversized value");
+		}
+		
+		
+		try{
+			dataStore.put(key, value);
+		} catch (KVException e){
+			// Must be called before return or abnormal exit
+			AutoGrader.agKVServerPutFinished(key, value);
+			throw e;
+		}
+		
+		dataCache.put(key,value);
+		
 		// Must be called before return or abnormal exit
 		AutoGrader.agKVServerPutFinished(key, value);
 	}
@@ -68,12 +85,27 @@ public class KVServer implements KeyValueInterface {
 	public String get (String key) throws KVException {
 		// Must be called before anything else
 		AutoGrader.agKVServerGetStarted(key);
-
+		
 		// TODO: implement me
-
+		//If KV pair is in the cache
+		String toReturn = dataCache.get(key);
+		if(toReturn != null){
+			AutoGrader.agKVServerGetFinished(key);
+			return toReturn;
+		}
+		
+		try{
+			toReturn = dataStore.get(key);
+		} catch (KVException e){
+			AutoGrader.agKVServerGetFinished(key);
+			// throw new KVException("Does not exist");
+		}
+		
+		//If we found something in the dataStore, put it in the cache
+		dataCache.put(key, toReturn);
 		// Must be called before return or abnormal exit
 		AutoGrader.agKVServerGetFinished(key);
-		return null;
+		return toReturn;
 	}
 	
 	public void del (String key) throws KVException {
@@ -81,7 +113,14 @@ public class KVServer implements KeyValueInterface {
 		AutoGrader.agKVServerDelStarted(key);
 
 		// TODO: implement me
-
+		try{
+			dataStore.del(key);
+		} catch (KVException e){
+			AutoGrader.agKVServerDelFinished(key);
+			//throw new KVException("Does not exist");
+		}
+		
+		dataCache.del(key);
 		// Must be called before return or abnormal exit
 		AutoGrader.agKVServerDelFinished(key);
 	}

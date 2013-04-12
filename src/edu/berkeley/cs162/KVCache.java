@@ -30,6 +30,7 @@
  */
 package edu.berkeley.cs162;
 
+import java.util.LinkedList;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 
@@ -41,7 +42,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 public class KVCache implements KeyValueInterface {	
 	private int numSets = 100;
 	private int maxElemsPerSet = 10;
-		
+	
+	private LinkedList<cacheEntry>[] cacheSet = null;
+	private WriteLock[] arrayOfLocks = null;
 	/**
 	 * Creates a new LRU cache.
 	 * @param cacheSize	the maximum number of entries that will be kept in this cache.
@@ -50,6 +53,13 @@ public class KVCache implements KeyValueInterface {
 		this.numSets = numSets;
 		this.maxElemsPerSet = maxElemsPerSet;     
 		// TODO: Implement Me!
+		cacheSet = (LinkedList<cacheEntry>[]) new LinkedList[this.numSets];
+		
+		arrayOfLocks = new WriteLock[this.numSets];
+		
+		for(int i = 0; i < this.numSets; i++){
+			arrayOfLocks[i] = new WriteLock(null);
+		}
 	}
 
 	/**
@@ -64,10 +74,23 @@ public class KVCache implements KeyValueInterface {
 		AutoGrader.agCacheGetDelay();
         
 		// TODO: Implement Me!
+		int setLocation = getSetId(key);
+		String toReturn = null;
+		LinkedList<cacheEntry> kvSet = cacheSet[setLocation];
+		
+		cacheEntry entry = null;
+		for(int i = 0; i < kvSet.size(); i++){
+			entry = kvSet.get(i);
+			if(entry.key == key){
+				toReturn = entry.value;
+				entry.useBit = true;
+				break;
+			}
+		}
 		
 		// Must be called before returning
 		AutoGrader.agCacheGetFinished(key);
-		return null;
+		return toReturn;
 	}
 
 	/**
@@ -85,7 +108,63 @@ public class KVCache implements KeyValueInterface {
 		AutoGrader.agCachePutDelay();
 
 		// TODO: Implement Me!
+		int setLocation = getSetId(key);
 		
+		//Find the set
+		LinkedList<cacheEntry> kvSet = cacheSet[setLocation];
+
+		//First we will search to see if the List Exists 
+		cacheEntry entry = null;
+		boolean found = false;
+		
+		for(int i = 0; i < kvSet.size(); i++){
+			entry = kvSet.get(i);
+			
+			
+			//Check if the key matches
+			//Assuming "==" matches the string characters
+			if(entry.key == key){
+				entry.value = value;
+				entry.useBit = false;
+				found = true;
+				break;
+			}
+		}
+		
+		//If we haven't found entry in the scan
+		if(!found){
+			boolean addComplete = false;
+			
+			/* ****************************************************
+			 * Since we're moving around nodes in the LinkedList, 
+			 * we need to account for that when we scan           */
+			
+			//Default Case.
+			//When there is space available
+			if(kvSet.isEmpty() || kvSet.size() < this.maxElemsPerSet){
+				cacheEntry newEntry = new cacheEntry(key, value);
+				kvSet.add(newEntry);
+				addComplete = true;
+			}
+			
+			entry = null;
+			//Case when list is full
+			while(!addComplete){
+				//Always check the head (this is a changing element)
+				entry = kvSet.getFirst();
+				if(entry.useBit){
+					entry.useBit = false;
+					kvSet.remove();
+					kvSet.add(entry);
+				} else {
+					cacheEntry newEntry = new cacheEntry(key, value);
+					//Remove head
+					kvSet.remove();
+					//Add new entry
+					kvSet.add(newEntry);
+				}
+			}
+		}
 		// Must be called before returning
 		AutoGrader.agCachePutFinished(key, value);
 	}
@@ -101,7 +180,20 @@ public class KVCache implements KeyValueInterface {
 		AutoGrader.agCacheDelDelay();
 		
 		// TODO: Implement Me!
+		int setLocation = getSetId(key);
 		
+		//Find the set
+		LinkedList<cacheEntry> kvSet = cacheSet[setLocation];
+		//First we will search to see if the List Exists 
+		cacheEntry entry = null;
+		
+		for(int i = 0; i < kvSet.size(); i++){
+			entry = kvSet.get(i);
+			if(entry.key == key){
+				kvSet.remove(i);
+				break;
+			}
+		}
 		// Must be called before returning
 		AutoGrader.agCacheDelFinished(key);
 	}
@@ -112,6 +204,20 @@ public class KVCache implements KeyValueInterface {
 	 */
 	public WriteLock getWriteLock(String key) {
 	    // TODO: Implement Me!
+		int setLocation = getSetId(key);
+		//Find the set
+		LinkedList<cacheEntry> kvSet = cacheSet[setLocation];
+		//First we will search to see if the List Exists 
+		cacheEntry entry = null;
+		
+		//If the key exists in the cache, return the lock
+		for(int i = 0; i < kvSet.size(); i++){
+			entry = kvSet.get(i);
+			if(entry.key == key){
+				return arrayOfLocks[setLocation];
+			}
+		}
+		
 	    return null;
 	}
 	
@@ -128,4 +234,20 @@ public class KVCache implements KeyValueInterface {
         // TODO: Implement Me!
         return null;
     }
+    
+
+    
+    
+	private class cacheEntry {
+		String key;
+		String value;
+		boolean	useBit;
+		
+		private cacheEntry(String aKey, String aValue){
+			this.key = aKey;
+			this.value = aValue;
+			this.useBit = false;
+		}
+	}
 }
+
