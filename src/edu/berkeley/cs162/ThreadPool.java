@@ -67,6 +67,7 @@ public class ThreadPool {
 	public void addToQueue(Runnable r) throws InterruptedException
 	{
 	      jobsList.addLast(r);
+	      //Gotta wake up sleeping/waiting threads at this point
 	}
 	
 	/** 
@@ -105,7 +106,7 @@ class WorkerThread extends Thread {
 	public void run()
 	{
 	      while(isRunning){
-	    	  try {
+	    	try {
 				parentThreadPool.getJob().run();
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block

@@ -58,7 +58,7 @@ public class KVCache implements KeyValueInterface {
 		arrayOfLocks = new WriteLock[this.numSets];
 		
 		for(int i = 0; i < this.numSets; i++){
-			arrayOfLocks[i] = new WriteLock(null);
+			arrayOfLocks[i] = new WriteLock(new ReentrantReadWriteLock());
 		}
 	}
 

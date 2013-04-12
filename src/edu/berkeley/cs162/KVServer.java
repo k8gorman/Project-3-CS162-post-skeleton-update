@@ -30,6 +30,8 @@
  */
 package edu.berkeley.cs162;
 
+import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+
 /**
  * This class defines the slave key value servers. Each individual KVServer 
  * would be a fully functioning Key-Value server. For Project 3, you would 
@@ -60,10 +62,10 @@ public class KVServer implements KeyValueInterface {
 		AutoGrader.agKVServerPutStarted(key, value);
 		
 		// TODO: implement me
-		if(key.length() < this.MAX_KEY_SIZE){
+		if(key.length() < KVServer.MAX_KEY_SIZE){
 			//throw new KVException("Oversized key");
 		}
-		if(value.length() < this.MAX_VAL_SIZE){
+		if(value.length() < KVServer.MAX_VAL_SIZE){
 			//throw new KVException("Oversized value");
 		}
 		
@@ -76,8 +78,10 @@ public class KVServer implements KeyValueInterface {
 			throw e;
 		}
 		
+		WriteLock lock = dataCache.getWriteLock(key);
+		lock.lock();
 		dataCache.put(key,value);
-		
+		lock.unlock();
 		// Must be called before return or abnormal exit
 		AutoGrader.agKVServerPutFinished(key, value);
 	}
@@ -88,8 +92,12 @@ public class KVServer implements KeyValueInterface {
 		
 		// TODO: implement me
 		//If KV pair is in the cache
+		WriteLock lock = dataCache.getWriteLock(key);
+		lock.lock();
+		
 		String toReturn = dataCache.get(key);
 		if(toReturn != null){
+			lock.unlock();
 			AutoGrader.agKVServerGetFinished(key);
 			return toReturn;
 		}
@@ -97,12 +105,14 @@ public class KVServer implements KeyValueInterface {
 		try{
 			toReturn = dataStore.get(key);
 		} catch (KVException e){
+			lock.unlock();
 			AutoGrader.agKVServerGetFinished(key);
 			// throw new KVException("Does not exist");
 		}
 		
 		//If we found something in the dataStore, put it in the cache
 		dataCache.put(key, toReturn);
+		lock.unlock();
 		// Must be called before return or abnormal exit
 		AutoGrader.agKVServerGetFinished(key);
 		return toReturn;
@@ -120,7 +130,10 @@ public class KVServer implements KeyValueInterface {
 			//throw new KVException("Does not exist");
 		}
 		
+		WriteLock lock = dataCache.getWriteLock(key);
+		lock.lock();
 		dataCache.del(key);
+		lock.unlock();
 		// Must be called before return or abnormal exit
 		AutoGrader.agKVServerDelFinished(key);
 	}
