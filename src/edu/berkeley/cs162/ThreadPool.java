@@ -67,7 +67,11 @@ public class ThreadPool {
 	public void addToQueue(Runnable r) throws InterruptedException
 	{
 	      jobsList.addLast(r);
+<<<<<<< HEAD
 	      //Gotta wake up sleeping/waiting threads at this point
+=======
+	      notify();
+>>>>>>> minor changes
 	}
 	
 	/** 

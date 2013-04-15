@@ -64,11 +64,11 @@ assertTrue(e.getMsg().getMessage().equals("Message format incorrect"));
 public void testinput3() throws KVException {
 
 
-String str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><KVMessage type=\"putreq\"><Key>breakfast</Key><Value>third breakfast</Value></KVMessage>";
+String str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><KVMessage type=\"putreq\"><Key>meow</Key><Value>mix</Value></KVMessage>";
 InputStream is = new ByteArrayInputStream(str.getBytes());
 KVMessage inputtest3 = new KVMessage(is);
-assertTrue(inputtest3.getKey().equals("breakfast"));
-assertTrue(inputtest3.getValue().equals("third breakfast"));
+assertTrue(inputtest3.getKey().equals("meow"));
+assertTrue(inputtest3.getValue().equals("mix"));
 assertTrue(inputtest3.getMsgType().equals("putreq"));
 }
 /*

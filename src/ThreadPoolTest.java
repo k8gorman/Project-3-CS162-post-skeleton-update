@@ -15,12 +15,18 @@ public class ThreadPoolTest {
 			//add a bunch of Runnables to the thread pool
 			Runnable runMe = new Runnable(){
 				public void run(){
-					
+					System.out.println("This thread is running"); //need to add thread num etc
 				}
-			}
+			};
+			tp.addToQueue(runMe);
 		}
 	}
+<<<<<<< HEAD
 
 }
 
 */
+=======
+	
+}//ends class
+>>>>>>> minor changes

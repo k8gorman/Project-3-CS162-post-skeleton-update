@@ -266,7 +266,7 @@ newDoc.appendChild(rootElement);
 //HERE COMES THE FUN
 //DO THE MESSAGE BUSINESS
 if (!msgTypes.contains(msgType)){
-throw new KVException (new KVMessage("resp", "XML Error: Received unparseable message"));
+	throw new KVException (new KVMessage("resp", "XML Error: Received unparseable message"));
 }
 if (msgType == "putreq"){
 if (key !=null && value !=null){
