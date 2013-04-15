@@ -53,7 +53,7 @@ public class ThreadPool {
 	    for (int i=0; i < size ; i++){
 	    	threads[i] = new WorkerThread(this);
 	    	//JVM will call run when start() is called
-	    	threads[i].run();
+	    	threads[i].start();
 	    }
 	}
 
@@ -63,13 +63,17 @@ public class ThreadPool {
 	 * @param r job that has to be executed asynchronously
 	 * @throws InterruptedException 
 	 */
-	public void addToQueue(Runnable r) throws InterruptedException
+	
+	//KATE: ADDED SYNCHRONIZED keyword. Piazza seems to indicate this is fine. 
+	public synchronized void addToQueue(Runnable r) throws InterruptedException
 	{
-	      jobsList.addLast(r);
+	      
+	    	  jobsList.addLast(r);
+	    	//Gotta wake up sleeping/waiting threads at this point
+	    	  notify();
+	      
 
-	      //Gotta wake up sleeping/waiting threads at this point
-
-	      notify();
+	      
 
 	}
 	
@@ -79,9 +83,14 @@ public class ThreadPool {
 	 * @throws InterruptedException 
 	 */
 	public synchronized Runnable getJob() throws InterruptedException {
-	    while (jobsList.isEmpty()){
-	    	wait();
+	  
+		   while (jobsList.isEmpty()){
+	   
+	    	
+	    		wait();
+	    	
 	    }
+	  
 	    return jobsList.removeFirst();
 	}
 }
