@@ -31,11 +31,10 @@
 package edu.berkeley.cs162;
 
 import java.io.IOException;
+import edu.berkeley.cs162.SocketServer;
 
 import edu.berkeley.cs162.KVClientHandler;
 import edu.berkeley.cs162.KVServer;
-import edu.berkeley.cs162.NetworkHandler;
-import edu.berkeley.cs162.SocketServer;
 
 public class Server {
 	static KVServer key_server = null;

@@ -38,7 +38,6 @@ public class ThreadPool {
 	 */
 	protected Thread threads[] = null;
 	//This is basically a queue, add to the end and remove from the front
-	
 	LinkedList<Runnable> jobsList;
 
 	/**
@@ -54,7 +53,7 @@ public class ThreadPool {
 	    for (int i=0; i < size ; i++){
 	    	threads[i] = new WorkerThread(this);
 	    	//JVM will call run when start() is called
-	    	threads[i].start();
+	    	threads[i].run();
 	    }
 	}
 
@@ -67,11 +66,11 @@ public class ThreadPool {
 	public void addToQueue(Runnable r) throws InterruptedException
 	{
 	      jobsList.addLast(r);
-<<<<<<< HEAD
+
 	      //Gotta wake up sleeping/waiting threads at this point
-=======
+
 	      notify();
->>>>>>> minor changes
+
 	}
 	
 	/** 
