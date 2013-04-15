@@ -31,6 +31,7 @@
 package edu.berkeley.cs162;
 
 import java.util.LinkedList;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 
@@ -58,7 +59,8 @@ public class KVCache implements KeyValueInterface {
 		arrayOfLocks = new WriteLock[this.numSets];
 		
 		for(int i = 0; i < this.numSets; i++){
-			arrayOfLocks[i] = new WriteLock(new ReentrantReadWriteLock());
+			ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
+			arrayOfLocks[i] = rwl.writeLock();
 		}
 	}
 
