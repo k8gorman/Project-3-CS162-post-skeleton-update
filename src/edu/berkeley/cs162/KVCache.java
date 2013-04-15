@@ -56,6 +56,10 @@ public class KVCache implements KeyValueInterface {
 		// TODO: Implement Me!
 		cacheSet = (LinkedList<cacheEntry>[]) new LinkedList[this.numSets];
 		
+		for(int j = 0; j < this.numSets; j++){
+			cacheSet[j] = new LinkedList<cacheEntry>();
+		}
+		
 		arrayOfLocks = new WriteLock[this.numSets];
 		
 		for(int i = 0; i < this.numSets; i++){
@@ -212,6 +216,9 @@ public class KVCache implements KeyValueInterface {
 		//First we will search to see if the List Exists 
 		cacheEntry entry = null;
 		
+		return arrayOfLocks[setLocation];
+		
+		/*
 		//If the key exists in the cache, return the lock
 		for(int i = 0; i < kvSet.size(); i++){
 			entry = kvSet.get(i);
@@ -221,6 +228,8 @@ public class KVCache implements KeyValueInterface {
 		}
 		
 	    return null;
+	    
+	    */
 	}
 	
 	/**

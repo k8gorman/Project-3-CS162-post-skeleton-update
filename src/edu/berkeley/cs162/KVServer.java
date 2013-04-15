@@ -62,11 +62,17 @@ public class KVServer implements KeyValueInterface {
 		AutoGrader.agKVServerPutStarted(key, value);
 		
 		// TODO: implement me
-		if(key.length() < KVServer.MAX_KEY_SIZE){
-			//throw new KVException("Oversized key");
+		if(key.length() > KVServer.MAX_KEY_SIZE){
+			KVMessage msgOverKey = new KVMessage("resp");
+			msgOverKey.setMessage("Oversized key");
+			
+			throw new KVException(msgOverKey);
 		}
-		if(value.length() < KVServer.MAX_VAL_SIZE){
-			//throw new KVException("Oversized value");
+		
+		if(value.length() > KVServer.MAX_VAL_SIZE){
+			KVMessage msgOverValue = new KVMessage("resp");
+			msgOverValue.setMessage("Oversized value");
+			throw new KVException(msgOverValue);
 		}
 		
 		
@@ -107,7 +113,9 @@ public class KVServer implements KeyValueInterface {
 		} catch (KVException e){
 			lock.unlock();
 			AutoGrader.agKVServerGetFinished(key);
-			// throw new KVException("Does not exist");
+			KVMessage msgDoesNotExist = new KVMessage("resp");
+			msgDoesNotExist.setMessage("Does not exist");
+			throw new KVException(msgDoesNotExist);
 		}
 		
 		//If we found something in the dataStore, put it in the cache
@@ -127,7 +135,9 @@ public class KVServer implements KeyValueInterface {
 			dataStore.del(key);
 		} catch (KVException e){
 			AutoGrader.agKVServerDelFinished(key);
-			//throw new KVException("Does not exist");
+			KVMessage msgDoesNotExist = new KVMessage("resp");
+			msgDoesNotExist.setMessage("Does not exist");
+			throw new KVException(msgDoesNotExist);
 		}
 		
 		WriteLock lock = dataCache.getWriteLock(key);
@@ -136,5 +146,19 @@ public class KVServer implements KeyValueInterface {
 		lock.unlock();
 		// Must be called before return or abnormal exit
 		AutoGrader.agKVServerDelFinished(key);
+	}
+	
+	public KVStore getDataStore(String password){
+		if(password.equals("givemedatastore"))
+			return dataStore;
+		else
+			return null;
+	}
+	
+	public KVCache getDataCache(String password){
+		if(password.equals("givemedatacache"))
+			return dataCache;
+		else
+			return null;
 	}
 }
