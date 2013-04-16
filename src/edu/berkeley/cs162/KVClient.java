@@ -56,24 +56,67 @@ public class KVClient implements KeyValueInterface {
 	}
 	
 	private Socket connectHost() throws KVException {
-	    // TODO: Implement Me!  
-		return null;
+	    // TODO: Implement Me!
+	    //host must be the server the client is connecting to
+	    //create a socket to make connection using port # and ServerSocket's hostnane
+	    //create a kvmessage and send using that socket.
+	    //return the socket
+	    Socket sock = new Socket(server, port); //connects to host server with port #
+	    if(sock!=null)
+			return sock;
+		else throw new KVException (new KVMessage("Error: cannot connect to host"));
 	}
-	
 	private void closeHost(Socket sock) throws KVException {
 	    // TODO: Implement Me!
+
+	    try{
+		    sock.close();
+		}
+		catch {
+			new KVException (new KVMessage("Error: cannot close socket"));
+		}
 	}
 	
 	public void put(String key, String value) throws KVException {
 	    // TODO: Implement Me!
+
+	    if(key == null || value == null)
+	    	throw new KVException (new KVMessage("Error: null key or value"));
+	    else{
+	    	KVMessage mess = new KVMessage("putreq", value);
+	    	mess.sendMessage(sock);
+	    }
 	}
 
 	public String get(String key) throws KVException {
 	    // TODO: Implement Me!
-	    return null;
+	    //if key is null, throw IOException
+	    //create KVMessage with the key
+	    //send message to the server using the socket
+	    //if it didn't work, throw exception
+
+	    if(key == null)
+	    	throw new KVException (new KVMessage("Error: null"));
+	    else{
+	    	KVMessage mess = new KVMessage("getreq", key);
+	    	mess.sendMessage(sock);	    
+	   	 	return key;
+		}
 	}
 	
 	public void del(String key) throws KVException {
 	    // TODO: Implement Me!
+
+	    //if key is null, throw IOException
+	    //create KVMessage with the key
+	    //send message to the server
+	    //if it didn't work, throw an exception
+
+	   	if(key == null)
+	    	throw new KVException (new KVMessage("Error: null key in delete"));
+	    else{
+	    	KVMessage mess = new KVMessage("delreq", key);
+	    	mess.sendMessage(sock);
+	    }
 	}	
 }
