@@ -32,19 +32,17 @@ package edu.berkeley.cs162;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 
 import edu.berkeley.cs162.NetworkHandler;
 import java.net.Socket;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 /**
  * This NetworkHandler will asynchronously handle the socket connections. 
  * It uses a threadpool to ensure that none of it's methods are blocking.
@@ -76,6 +74,8 @@ public class KVClientHandler implements NetworkHandler {
 		public void run() {
 		     // TODO: Implement Me!
 			InputStream input = null;
+			
+			//Get input stream
 			try {
 				input = client.getInputStream();
 			} catch (IOException e) {
@@ -83,6 +83,7 @@ public class KVClientHandler implements NetworkHandler {
 				e.printStackTrace();
 			}
 			
+			//Setup the array's size
 			byte byteArray[] = null;
 			try {
 				byteArray = new byte[input.available()];
@@ -91,12 +92,140 @@ public class KVClientHandler implements NetworkHandler {
 				e.printStackTrace();
 			}
 			
+			//Read Bytes from stream into Arrray
 			try {
 				input.read(byteArray);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+			//Convert ByteArray to String
+			String parsedString = null;
+			try {
+				parsedString = new String(byteArray, "UTF8");
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			//Create XML
+			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();  
+		    DocumentBuilder builder; 
+		    Document document = null;
+		    try{
+		        builder = factory.newDocumentBuilder();  
+		        document = builder.parse( new InputSource( new StringReader( parsedString ) ) );  
+		    } catch (Exception e) {  
+		        e.printStackTrace();  
+		    } 
+		    
+		    String key = document.getElementById("key").getTextContent();
+		    String value = document.getElementById("value").getTextContent();
+		    String msgType = document.getElementById("msgType").getTextContent();
+		    
+		    //Check if mesgType is valid
+		    KVMessage clientMessage = null;
+		    try{
+		    	clientMessage = new KVMessage(msgType);
+		    } catch (KVException e){
+		    	//Annoying try catch
+		    	//If XML is invalid, we must send a fail response
+		    	KVMessage failXMLResponse = null;
+		    	try {
+					failXMLResponse = new KVMessage("resp", "XML Error: Received unparseable message");
+				} catch (KVException e1) {
+					//Why would this fail
+				}
+		    	
+		    	try {
+					failXMLResponse.sendMessage(client);
+				} catch (KVException e1) {
+					//Don't really care
+				}
+		    	return;
+		    }
+		    
+		    //Finally if everything passes, we process the requests
+		    /* ************* Put Request ******************* */
+		    if(clientMessage.getMsgType() == "putreq"){
+		    	try {
+					kv_Server.put(key, value);
+				} catch (KVException e) {
+					//Send fail response
+					try {
+						e.getMsg().sendMessage(client);
+					} catch (KVException e1) {
+						//Do nothing
+					}
+				}
+		    	//Send success response
+		    	KVMessage msg = null;
+				try {
+					msg = new KVMessage("resp","Success");
+				} catch (KVException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+		    	try {
+					msg.sendMessage(client);
+				} catch (KVException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+		    /* ************* Get Request ******************* */
+		    } else if(clientMessage.getMsgType() == "getreq"){
+		    	String valueReturned = null;
+		    	
+		    	try {
+					valueReturned = kv_Server.get(key);
+				} catch (KVException e) {
+					try {
+						e.getMsg().sendMessage(client);
+					} catch (KVException e1) {
+						//Do nothing if send fails
+					}
+				}
+		    	//Send success response
+		    	KVMessage msg = null;
+				try {
+					msg = new KVMessage("resp","Success");
+				} catch (KVException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+		    	msg.setKey(key);
+		    	msg.setValue(valueReturned);
+		    	try {
+					msg.sendMessage(client);
+				} catch (KVException e) {
+					
+				}
+		    /* ************* Del Request ******************* */
+		    } else if(clientMessage.getMsgType() == "delreq"){
+		    	try {
+					kv_Server.del(key);
+				} catch (KVException e) {
+					try {
+						e.getMsg().sendMessage(client);
+					} catch (KVException e1) {
+						
+					}
+				}
+		    	
+		    	KVMessage msg = null;
+				try {
+					msg = new KVMessage("resp","Success");
+				} catch (KVException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+		    	try {
+					msg.sendMessage(client);
+				} catch (KVException e) {
+					
+				}
+		    }
 		}
 		
 		public ClientHandler(KVServer kvServer, Socket client) {
