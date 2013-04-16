@@ -87,7 +87,7 @@ public class KVCache implements KeyValueInterface {
 		cacheEntry entry = null;
 		for(int i = 0; i < kvSet.size(); i++){
 			entry = kvSet.get(i);
-			if(entry.key == key){
+			if(entry.key.equals(key)){
 				toReturn = entry.value;
 				entry.useBit = true;
 				break;
@@ -147,7 +147,7 @@ public class KVCache implements KeyValueInterface {
 			
 			//Default Case.
 			//When there is space available
-			if(kvSet.isEmpty() || kvSet.size() < this.maxElemsPerSet){
+			if(kvSet.size() < this.maxElemsPerSet){
 				cacheEntry newEntry = new cacheEntry(key, value);
 				kvSet.add(newEntry);
 				addComplete = true;
@@ -160,14 +160,15 @@ public class KVCache implements KeyValueInterface {
 				entry = kvSet.getFirst();
 				if(entry.useBit){
 					entry.useBit = false;
-					kvSet.remove();
+					kvSet.removeFirst();
 					kvSet.add(entry);
 				} else {
 					cacheEntry newEntry = new cacheEntry(key, value);
 					//Remove head
-					kvSet.remove();
+					kvSet.removeFirst();
 					//Add new entry
 					kvSet.add(newEntry);
+					addComplete = true;
 				}
 			}
 		}
@@ -247,14 +248,23 @@ public class KVCache implements KeyValueInterface {
     }
     
 
-    
+    public void printList(String key){
+    	int setLocation = getSetId(key);
+		//Find the set
+		LinkedList<cacheEntry> kvSet = cacheSet[setLocation];
+		cacheEntry entry = null;
+		for(int i = 0; i < kvSet.size(); i++){
+			entry = kvSet.get(i);
+			System.out.println(i+1 + ". " + entry.value + "     UseBit: " + entry.useBit);
+		}
+    }
     
 	private class cacheEntry {
 		String key;
 		String value;
 		boolean	useBit;
 		
-		private cacheEntry(String aKey, String aValue){
+		public cacheEntry(String aKey, String aValue){
 			this.key = aKey;
 			this.value = aValue;
 			this.useBit = false;

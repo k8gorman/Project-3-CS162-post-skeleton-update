@@ -32,6 +32,7 @@ package edu.berkeley.cs162;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 
 /** 
  * This is an generic class that should handle all TCP network connections 
@@ -44,13 +45,22 @@ public class SocketServer {
 	NetworkHandler handler;
 	ServerSocket server;
 	
+	Boolean serverRun;
 	public SocketServer(String hostname, int port) {
 		this.hostname = hostname;
 		this.port = port;
+		
+		
+		this.serverRun = true;
 	}
 	
 	public void connect() throws IOException {
 	      // TODO: implement me
+		try{
+			server = new ServerSocket(port);
+		} catch (IOException e){
+			throw e;
+		}
 	}
 	
 	/**
@@ -59,6 +69,15 @@ public class SocketServer {
 	 */
 	public void run() throws IOException {
 	      // TODO: implement me
+		while(!server.isClosed()){
+			Socket client = null;
+			try{
+				client = server.accept();
+			} catch (IOException e){
+				throw e;
+			}
+			handler.handle(client);
+		}
 	}
 	
 	/** 
@@ -74,10 +93,16 @@ public class SocketServer {
 	 */
 	public void stop() {
 	      // TODO: implement me
+		closeSocket();
 	}
 	
 	private void closeSocket() {
 	     // TODO: implement me
+		try {
+			server.close();
+		} catch (IOException e) {
+			//cool do nothing
+		}
 	}
 	
 	protected void finalize(){
