@@ -65,6 +65,7 @@ public class ThreadPool {
 	 */
 	
 	//KATE: ADDED SYNCHRONIZED keyword. Piazza seems to indicate this is fine. 
+	//Basically, wait and notify need to be synched on the same object this ensures that.
 	public synchronized void addToQueue(Runnable r) throws InterruptedException
 	{
 	      
