@@ -31,9 +31,20 @@
 package edu.berkeley.cs162;
 
 import java.io.IOException;
+import java.io.InputStream;
+
 import edu.berkeley.cs162.NetworkHandler;
 import java.net.Socket;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 /**
  * This NetworkHandler will asynchronously handle the socket connections. 
  * It uses a threadpool to ensure that none of it's methods are blocking.
@@ -64,6 +75,28 @@ public class KVClientHandler implements NetworkHandler {
 		@Override
 		public void run() {
 		     // TODO: Implement Me!
+			InputStream input = null;
+			try {
+				input = client.getInputStream();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			byte byteArray[] = null;
+			try {
+				byteArray = new byte[input.available()];
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			try {
+				input.read(byteArray);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 		public ClientHandler(KVServer kvServer, Socket client) {

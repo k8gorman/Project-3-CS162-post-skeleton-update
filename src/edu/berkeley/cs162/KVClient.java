@@ -31,7 +31,9 @@
  */
 package edu.berkeley.cs162;
 
+import java.io.IOException;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 
 /**
@@ -45,6 +47,8 @@ public class KVClient implements KeyValueInterface {
 
 	private String server = null;
 	private int port = 0;
+	
+	private Socket sock = null;
 	
 	/**
 	 * @param server is the DNS reference to the Key-Value server
@@ -61,7 +65,17 @@ public class KVClient implements KeyValueInterface {
 	    //create a socket to make connection using port # and ServerSocket's hostnane
 	    //create a kvmessage and send using that socket.
 	    //return the socket
-	    Socket sock = new Socket(server, port); //connects to host server with port #
+	    sock = null;
+		try {
+			sock = new Socket(server, port);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} //connects to host server with port #
+		
 	    if(sock!=null)
 			return sock;
 		else throw new KVException (new KVMessage("Error: cannot connect to host"));
@@ -72,7 +86,7 @@ public class KVClient implements KeyValueInterface {
 	    try{
 		    sock.close();
 		}
-		catch {
+		catch (Exception e){
 			new KVException (new KVMessage("Error: cannot close socket"));
 		}
 	}
