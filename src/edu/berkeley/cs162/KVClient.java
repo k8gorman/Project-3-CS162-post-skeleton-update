@@ -57,6 +57,13 @@ public class KVClient implements KeyValueInterface {
 	public KVClient(String server, int port) {
 		this.server = server;
 		this.port = port;
+		
+		try {
+			this.sock = connectHost();
+		} catch (KVException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	private Socket connectHost() throws KVException {
@@ -65,9 +72,9 @@ public class KVClient implements KeyValueInterface {
 	    //create a socket to make connection using port # and ServerSocket's hostnane
 	    //create a kvmessage and send using that socket.
 	    //return the socket
-	    sock = null;
+	    Socket toReturnSock = null;
 		try {
-			sock = new Socket(server, port);
+			toReturnSock = new Socket(server, port);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -76,13 +83,12 @@ public class KVClient implements KeyValueInterface {
 			e.printStackTrace();
 		} //connects to host server with port #
 		
-	    if(sock!=null)
-			return sock;
+	    if(toReturnSock!=null)
+			return toReturnSock;
 		else throw new KVException (new KVMessage("Error: cannot connect to host"));
 	}
 	private void closeHost(Socket sock) throws KVException {
 	    // TODO: Implement Me!
-
 	    try{
 		    sock.close();
 		}
@@ -97,8 +103,22 @@ public class KVClient implements KeyValueInterface {
 	    if(key == null || value == null)
 	    	throw new KVException (new KVMessage("Error: null key or value"));
 	    else{
-	    	KVMessage mess = new KVMessage("putreq", value);
+	    	KVMessage mess = new KVMessage("putreq");
+	    	mess.setKey(key);
+	    	mess.setValue(value);
 	    	mess.sendMessage(sock);
+	    	
+	    	//Checkout the Response
+	    	KVMessage response = null;
+	    	try {
+				response = new KVMessage(sock.getInputStream());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	    	
+	    	if(response.getMessage() == "IO Error"){
+	    		throw new KVException(response);
+	    	}
 	    }
 	}
 
@@ -112,9 +132,23 @@ public class KVClient implements KeyValueInterface {
 	    if(key == null)
 	    	throw new KVException (new KVMessage("Error: null"));
 	    else{
-	    	KVMessage mess = new KVMessage("getreq", key);
-	    	mess.sendMessage(sock);	    
-	   	 	return key;
+	    	KVMessage mess = new KVMessage("getreq");
+	    	mess.setKey(key);
+	    	mess.sendMessage(sock);	 
+	    	
+	    	//Checkout the Response
+	    	KVMessage response = null;
+	    	try {
+				response = new KVMessage(sock.getInputStream());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	    	
+	    	if(response.getMessage() == "Does not exist"){
+	    		throw new KVException(response);
+	    	}
+	    	
+	   	 	return response.getValue();
 		}
 	}
 	
@@ -129,8 +163,21 @@ public class KVClient implements KeyValueInterface {
 	   	if(key == null)
 	    	throw new KVException (new KVMessage("Error: null key in delete"));
 	    else{
-	    	KVMessage mess = new KVMessage("delreq", key);
+	    	KVMessage mess = new KVMessage("delreq");
+	    	mess.setKey(key);
 	    	mess.sendMessage(sock);
+	    	
+	    	//Checkout the Response
+	    	KVMessage response = null;
+	    	try {
+				response = new KVMessage(sock.getInputStream());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	    	
+	    	if(response.getMessage() == "Does not exist"){
+	    		throw new KVException(response);
+	    	}
 	    }
 	}	
 }

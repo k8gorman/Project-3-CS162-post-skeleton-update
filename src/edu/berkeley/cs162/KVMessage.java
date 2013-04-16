@@ -168,29 +168,29 @@ this.message=message;
      */
 public KVMessage(InputStream input) throws KVException {
    
-Document newDoc= null; 
-DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	Document newDoc= null; 
+	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
     DocumentBuilder db;
     //CREATE A NEW DOCUMENT BUILDER
     try {
-    db = dbf.newDocumentBuilder();
+    	db = dbf.newDocumentBuilder();
     }catch(ParserConfigurationException e){
-    KVMessage errorMsg = new KVMessage("resp", "Unknown Error: DocumentBuilder");;
-    throw new KVException (errorMsg);
+    	KVMessage errorMsg = new KVMessage("resp", "Unknown Error: DocumentBuilder");;
+    	throw new KVException (errorMsg);
     }
      
     //TRY TO PARSE THE INPUT STREAM
     try{
-    newDoc = db.parse(new NoCloseInputStream(input));
-    newDoc.setXmlStandalone(true);
+    	newDoc = db.parse(new NoCloseInputStream(input));
+    	newDoc.setXmlStandalone(true);
     }catch(IOException e){
-    KVMessage ioError = new KVMessage( "resp" , "Network Error: Could not receive data");
-     
+    	KVMessage ioError = new KVMessage( "resp" , "Network Error: Could not receive data");
+    	throw new KVException(ioError);
     } catch (SAXException e) {
-// TODO Auto-generated catch block
-KVMessage saxError = new KVMessage ("resp", "XML Error: Received unparseable message");
-
-}
+    	// TODO Auto-generated catch block
+    	KVMessage saxError = new KVMessage ("resp", "XML Error: Received unparseable message");
+    	throw new KVException(saxError);
+    }
      
     //NORMALIZE THE UNDERLYING DOM TREE
     // used this website as a resource: http://sanjaal.com/java/tag/getdocumentelementnormalize/
@@ -355,27 +355,28 @@ return stringwriter.toString();
 
 }//ends method
 
-public void sendMessage(Socket sock) throws KVException {
-      // TODO: implement me
-String xml = this.toXML();
-Writer output;
-try{
-output = new OutputStreamWriter(sock.getOutputStream());
-output.write(xml);
-output.flush();
-}catch(IOException e){
-//KVMessage
-KVMessage ioError = new KVMessage("error in sendMessage "+ e.getMessage());
-throw new KVException (ioError);
-}
-
-try {
-sock.shutdownOutput();
-} catch (IOException e) {
-// TODO Auto-generated catch block
-KVMessage socketError = new KVMessage("socket closure error "+ e.getMessage());
-throw new KVException(socketError);
-
-}
-}
+	public void sendMessage(Socket sock) throws KVException {
+	      // TODO: implement me
+		String xml = this.toXML();
+		Writer output;
+		//check if sock is bound.
+		try{
+			output = new OutputStreamWriter(sock.getOutputStream());
+			output.write(xml);
+			output.flush();
+		}catch(IOException e){
+			//KVMessage
+			KVMessage ioError = new KVMessage("error in sendMessage "+ e.getMessage());
+			throw new KVException (ioError);
+		}
+		
+		try {
+			sock.shutdownOutput();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			KVMessage socketError = new KVMessage("socket closure error "+ e.getMessage());
+			throw new KVException(socketError);
+			
+		}
+	}
 }
