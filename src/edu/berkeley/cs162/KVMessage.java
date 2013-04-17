@@ -189,6 +189,7 @@ public KVMessage(InputStream input) throws KVException {
     } catch (SAXException e) {
     	// TODO Auto-generated catch block
     	KVMessage saxError = new KVMessage ("resp", "XML Error: Received unparseable message");
+    	e.printStackTrace();
     	throw new KVException(saxError);
     }
      
@@ -238,120 +239,120 @@ return firstChild.getNodeValue();
 * @throws KVException if not enough data is available to generate a valid KV XML message
 */
 public String toXML() throws KVException {
-String xmlString;
-Text text;
-     
-DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-DocumentBuilder db = null;
-Document newDoc = null; 
-//try to make a new Doc builder which is the XML base
-try{
-db = dbf.newDocumentBuilder();
-newDoc = db.newDocument();
-newDoc.setXmlStandalone(true);
-}catch (ParserConfigurationException e){
-KVMessage dbMessage = new KVMessage("Unknown Error: toXML Document Building error");
-throw new KVException(dbMessage);
-}
-
-//now to make the XML Tree! 
-//MAKE THE ROOT ELEMENT the KVMessage
-Element rootElement = newDoc.createElement("KVMessage");
-//ADD THE ROOT TO THE XML
-//SET THE TYPE
-rootElement.setAttribute("type", msgType);
-newDoc.appendChild(rootElement);
-
-
-//HERE COMES THE FUN
-//DO THE MESSAGE BUSINESS
-if (!msgTypes.contains(msgType)){
-	throw new KVException (new KVMessage("resp", "XML Error: Received unparseable message"));
-}
-if (msgType == "putreq"){
-if (key !=null && value !=null){
-Element keyChild = newDoc.createElement("Key");
-keyChild.setTextContent(key);
-rootElement.appendChild(keyChild);
-
-Element valueChild = newDoc.createElement("Value");
-valueChild.setTextContent(value);
-rootElement.appendChild(valueChild);
-}else{
-throw new KVException (new KVMessage("resp", "XML Error: Received unparseable message"));
-}
-}
-
-if (msgType == "resp"){
-//if resp has K&V
-if (key !=null && value != null){
-Element keyChild = newDoc.createElement("Key");
-keyChild.setTextContent(key);
-rootElement.appendChild(keyChild);
-
-Element valueChild = newDoc.createElement("Value");
-valueChild.setTextContent(value);
-rootElement.appendChild(valueChild);
-}
-//if resp has no K&V
-else if (key == null && value ==null){
-Element messageChild = newDoc.createElement("Message");
-messageChild.setTextContent(message);
-rootElement.appendChild(messageChild);
-}else{
-throw new KVException (new KVMessage ("resp","XML Error: Received unparseable message" ));
-}
-}
-if (msgType == "getreq" ){
-if (key !=null){
-Element keyChild = newDoc.createElement("Key");
-keyChild.setTextContent(key);
-rootElement.appendChild(keyChild);
-}else{
-throw new KVException (new KVMessage("resp", "XML Error: Received unparseable message"));
-}
-}
-
-if (msgType == "delreq"){
-if (key !=null){
-Element keyChild = newDoc.createElement("Key");
-keyChild.setTextContent(key);
-rootElement.appendChild(keyChild);
-
-}
-}
-
-
-
-//XML Tree done
-// now need to transform this to output it
-TransformerFactory tf = TransformerFactory.newInstance();
-Transformer arnold = null;
-
-//try to make a new transformer
-try{
-arnold = tf.newTransformer();
-}catch (TransformerConfigurationException e){
-KVMessage transformerError = new KVMessage("make new transformer error: "+ e.getMessage());
-throw new KVException(transformerError);
-}
-
-
-
-// now take the string from the xml
-StringWriter stringwriter = new StringWriter();
-StreamResult dst = new StreamResult(stringwriter);
-
-DOMSource src = new DOMSource(newDoc);
-//try to tranfsorm xml src to dst
-try{
-arnold.transform(src, dst);
-}catch (TransformerException e){
-KVMessage transError = new KVMessage ("error converting xml src to dst" + e.getMessage());
-throw new KVException(transError);
-}
-//get the string from the string writer
-return stringwriter.toString();
+	String xmlString;
+	Text text;
+	     
+	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	DocumentBuilder db = null;
+	Document newDoc = null; 
+	//try to make a new Doc builder which is the XML base
+	try{
+		db = dbf.newDocumentBuilder();
+		newDoc = db.newDocument();
+		newDoc.setXmlStandalone(true);
+	}catch (ParserConfigurationException e){
+		KVMessage dbMessage = new KVMessage("Unknown Error: toXML Document Building error");
+		throw new KVException(dbMessage);
+	}
+	
+	//now to make the XML Tree! 
+	//MAKE THE ROOT ELEMENT the KVMessage
+	Element rootElement = newDoc.createElement("KVMessage");
+	//ADD THE ROOT TO THE XML
+	//SET THE TYPE
+	rootElement.setAttribute("type", msgType);
+	newDoc.appendChild(rootElement);
+	
+	
+	//HERE COMES THE FUN
+	//DO THE MESSAGE BUSINESS
+	if (!msgTypes.contains(msgType)){
+		throw new KVException (new KVMessage("resp", "XML Error: Received unparseable message"));
+	}
+	if (msgType == "putreq"){
+		if (key !=null && value !=null){
+			Element keyChild = newDoc.createElement("Key");
+			keyChild.setTextContent(key);
+			rootElement.appendChild(keyChild);
+		
+			Element valueChild = newDoc.createElement("Value");
+			valueChild.setTextContent(value);
+			rootElement.appendChild(valueChild);
+		}else{
+			throw new KVException (new KVMessage("resp", "XML Error: Received unparseable message"));
+		}
+	}
+	
+	if (msgType == "resp"){
+		//if resp has K&V
+		if (key !=null && value != null){
+			Element keyChild = newDoc.createElement("Key");
+			keyChild.setTextContent(key);
+			rootElement.appendChild(keyChild);
+			
+			Element valueChild = newDoc.createElement("Value");
+			valueChild.setTextContent(value);
+			rootElement.appendChild(valueChild);
+		}
+		//if resp has no K&V
+		else if (key == null && value ==null){
+			Element messageChild = newDoc.createElement("Message");
+			messageChild.setTextContent(message);
+			rootElement.appendChild(messageChild);
+		}else{
+			throw new KVException (new KVMessage ("resp","XML Error: Received unparseable message" ));
+		}
+		}
+		if (msgType == "getreq" ){
+			if (key !=null){
+				Element keyChild = newDoc.createElement("Key");
+				keyChild.setTextContent(key);
+				rootElement.appendChild(keyChild);
+			}else{
+				throw new KVException (new KVMessage("resp", "XML Error: Received unparseable message"));
+			}
+		}
+	
+		if (msgType == "delreq"){
+			if (key !=null){
+			Element keyChild = newDoc.createElement("Key");
+			keyChild.setTextContent(key);
+			rootElement.appendChild(keyChild);
+			
+		}
+	}
+	
+	
+	
+	//XML Tree done
+	// now need to transform this to output it
+	TransformerFactory tf = TransformerFactory.newInstance();
+	Transformer arnold = null;
+	
+	//try to make a new transformer
+	try{
+	arnold = tf.newTransformer();
+	}catch (TransformerConfigurationException e){
+	KVMessage transformerError = new KVMessage("make new transformer error: "+ e.getMessage());
+	throw new KVException(transformerError);
+	}
+	
+	
+	
+	// now take the string from the xml
+	StringWriter stringwriter = new StringWriter();
+	StreamResult dst = new StreamResult(stringwriter);
+	
+	DOMSource src = new DOMSource(newDoc);
+	//try to tranfsorm xml src to dst
+	try{
+	arnold.transform(src, dst);
+	}catch (TransformerException e){
+	KVMessage transError = new KVMessage ("error converting xml src to dst" + e.getMessage());
+	throw new KVException(transError);
+	}
+	//get the string from the string writer
+	return stringwriter.toString();
 
 }//ends method
 

@@ -89,7 +89,7 @@ public class KVClientHandler implements NetworkHandler {
 		    
 		    //Finally if everything passes, we process the requests
 		    /* ************* Put Request ******************* */
-		    if(clientMessage.getMsgType() == "putreq"){
+		    if(clientMessage.getMsgType().equals("putreq")){
 		    	try {
 					kv_Server.put(clientMessage.getKey(), clientMessage.getValue());
 				} catch (KVException e) {
@@ -108,6 +108,7 @@ public class KVClientHandler implements NetworkHandler {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+				
 		    	try {
 					msg.sendMessage(client);
 				} catch (KVException e) {
@@ -115,7 +116,7 @@ public class KVClientHandler implements NetworkHandler {
 					e.printStackTrace();
 				}
 		    /* ************* Get Request ******************* */
-		    } else if(clientMessage.getMsgType() == "getreq"){
+		    } else if(clientMessage.getMsgType().equals("getreq")){
 		    	String valueReturned = null;
 		    	
 		    	try {
@@ -143,7 +144,7 @@ public class KVClientHandler implements NetworkHandler {
 					
 				}
 		    /* ************* Del Request ******************* */
-		    } else if(clientMessage.getMsgType() == "delreq"){
+		    } else if(clientMessage.getMsgType().equals("delreq")){
 		    	try {
 					kv_Server.del(clientMessage.getKey());
 				} catch (KVException e) {

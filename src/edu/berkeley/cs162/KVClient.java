@@ -32,6 +32,7 @@
 package edu.berkeley.cs162;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -110,6 +111,7 @@ public class KVClient implements KeyValueInterface {
 	    	
 	    	//Checkout the Response
 	    	KVMessage response = null;
+	    	
 	    	try {
 				response = new KVMessage(sock.getInputStream());
 			} catch (IOException e) {
@@ -138,6 +140,7 @@ public class KVClient implements KeyValueInterface {
 	    	
 	    	//Checkout the Response
 	    	KVMessage response = null;
+	    	
 	    	try {
 				response = new KVMessage(sock.getInputStream());
 			} catch (IOException e) {
