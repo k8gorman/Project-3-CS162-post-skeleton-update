@@ -170,29 +170,86 @@ public KVMessage(InputStream input) throws KVException {
    
 Document newDoc= null; 
 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-    DocumentBuilder db;
-    //CREATE A NEW DOCUMENT BUILDER
-    try {
-    db = dbf.newDocumentBuilder();
-    }catch(ParserConfigurationException e){
-    KVMessage errorMsg = new KVMessage("resp", "Unknown Error: DocumentBuilder");;
-    throw new KVException (errorMsg);
-    }
-     
-    //TRY TO PARSE THE INPUT STREAM
-    try{
-    newDoc = db.parse(new NoCloseInputStream(input));
-    newDoc.setXmlStandalone(true);
-    }catch(IOException e){
-    KVMessage ioError = new KVMessage( "resp" , "Network Error: Could not receive data");
-     
-    } catch (SAXException e) {
-// TODO Auto-generated catch block
-KVMessage saxError = new KVMessage ("resp", "XML Error: Received unparseable message");
+DocumentBuilder db;
+//CREATE A NEW DOCUMENT BUILDER
+try {
+	db = dbf.newDocumentBuilder();
+}catch(ParserConfigurationException e){
+	KVMessage errorMsg = new KVMessage("resp", "Unknown Error: DocumentBuilder");;
+	throw new KVException (errorMsg);
+}
+
+//TRY TO PARSE THE INPUT STREAM
+try{
+	newDoc = db.parse(new NoCloseInputStream(input));
+	newDoc.setXmlStandalone(true);
+}catch(IOException e){
+	KVMessage ioError = new KVMessage( "resp" , "Network Error: Could not receive data");
+	throw new KVException(ioError);
+
+} catch (SAXException e) {
+	// TODO Auto-generated catch block
+	KVMessage saxError = new KVMessage ("resp", "XML Error: Received unparseable message");
+	throw new KVException(saxError);
 
 }
-     
-    //NORMALIZE THE UNDERLYING DOM TREE
+    Element rootElement = newDoc.getDocumentElement();
+    String msgType = rootElement.getAttribute("type");
+    if (msgType.equals("putreq")){
+    	Node incomingKey = rootElement.getFirstChild();
+    	Node incomingVal = rootElement.getLastChild();
+    	
+    	//check for null keys & vals & null textContents
+    	if (incomingKey == null || incomingKey.getTextContent() == null || incomingVal == null || incomingVal.getTextContent()== null){
+    		KVMessage thisMsg = new KVMessage( "resp", "XML Error: Received unparseable message");
+    		throw new KVException(thisMsg);
+    	}
+    
+    	//set up the pieces
+    	this.msgType = msgType;
+    	this.key = incomingKey.getTextContent();
+    	this.value = incomingVal.getTextContent();
+    	
+    }else if (msgType.equals("getreq")){ 
+    	Node incomingKey = rootElement.getFirstChild();
+    	if (incomingKey == null || incomingKey.getTextContent()==null){
+    		KVMessage thisErrorMsg = new KVMessage ("resp", "XML Error: Received unparseable message");
+    		throw new KVException(thisErrorMsg);
+    	}
+    	this.msgType = msgType;
+    	this.key = incomingKey.getTextContent();
+    	
+    	
+    }else if (msgType.equals("resp")){
+    	Element rootChild = (Element) rootElement.getFirstChild();
+    	if (rootChild.getTagName().equals("Key")){
+    		Node myKey = rootChild;
+    		Node myVal = (Element) rootElement.getLastChild();
+    		if (myKey.getTextContent() == null || myVal.getTextContent()== null){
+    			throw new KVException( new KVMessage ("resp", "XML Error: Received unparseable message"));
+    		}
+    		this.msgType = msgType;
+    		this.key = myKey.getTextContent();
+    		this.value = myVal.getTextContent();
+    	}else{
+    		this.msgType = msgType;
+    		this.message = rootChild.getTextContent();
+    	}
+    	
+    }else if(msgType.equals("delreq")){
+    	Node keyToDelete = rootElement.getFirstChild();
+    	if (keyToDelete == null || keyToDelete.getTextContent() == null){
+    		throw new KVException (new KVMessage ("resp", "XML Error: Received unparseable message"));
+    		
+    	}
+    	this.msgType = msgType;
+    	this.key = keyToDelete.getTextContent();
+    }else{
+    	//wrong message type
+    	throw new KVException(new KVMessage("resp", "XML Error: Received unparseable message"));
+    }
+    		
+  /*  //NORMALIZE THE UNDERLYING DOM TREE
     // used this website as a resource: http://sanjaal.com/java/tag/getdocumentelementnormalize/
     newDoc.getDocumentElement().normalize();
      
@@ -211,13 +268,17 @@ KVMessage saxError = new KVMessage ("resp", "XML Error: Received unparseable mes
     key = findTagsOfElement(elementType, "Key");
     value = findTagsOfElement(elementType, "Value");
     message = findTagsOfElement(elementType, "Message");
-    //TODO ERROR CHECKING?
+    //TODO ERROR CHECKING? */
+    
+    
 }
 
 /*
 * Returns the tag Value of an element
 * 
 */
+
+/*
 public String findTagsOfElement (Element thisElm, String tag){
 NodeList thisList = thisElm.getElementsByTagName(tag);
 if (thisList.getLength() == 0){
@@ -231,6 +292,7 @@ Node firstChild = (Node) node1ChildList.item(0);
 return firstChild.getNodeValue();
 }
 }
+*/
 
 /**
 * Generate the XML representation for this message.
