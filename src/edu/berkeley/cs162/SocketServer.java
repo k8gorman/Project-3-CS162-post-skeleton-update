@@ -49,15 +49,12 @@ public class SocketServer {
 	public SocketServer(String hostname, int port) {
 		this.hostname = hostname;
 		this.port = port;
-		
-		
-		this.serverRun = true;
 	}
 	
 	public void connect() throws IOException {
 	      // TODO: implement me
 		try{
-			server = new ServerSocket(port);
+			this.server = new ServerSocket(port);
 		} catch (IOException e){
 			throw e;
 		}
@@ -68,15 +65,13 @@ public class SocketServer {
 	 * @throws IOException if there is a network error (for instance if the socket is inadvertently closed) 
 	 */
 	public void run() throws IOException {
-	      // TODO: implement me
-		while(!server.isClosed()){
-			Socket client = null;
-			try{
-				client = server.accept();
-			} catch (IOException e){
-				throw e;
-			}
-			handler.handle(client);
+		if (this.handler == null) {
+			return;
+		}
+
+		while (true) {
+			Socket clientSocket = this.server.accept();
+			this.handler.handle(clientSocket);
 		}
 	}
 	
@@ -93,7 +88,7 @@ public class SocketServer {
 	 */
 	public void stop() {
 	      // TODO: implement me
-		closeSocket();
+		finalize();
 	}
 	
 	private void closeSocket() {
