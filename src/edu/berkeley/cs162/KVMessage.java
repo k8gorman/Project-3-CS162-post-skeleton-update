@@ -432,7 +432,7 @@ DOMSource src = new DOMSource(newDoc);
 try{
 arnold.transform(src, dst);
 }catch (TransformerException e){
-throw new KVException(xmlErrors);
+throw new KVException(xmlError);
 }
 //get the string from the string writer
 return stringwriter.toString();
