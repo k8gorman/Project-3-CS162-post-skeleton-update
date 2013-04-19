@@ -213,6 +213,7 @@ public KVMessage(InputStream input) throws KVException {
     value = findTagsOfElement(elementType, "Value");
     message = findTagsOfElement(elementType, "Message");
     //TODO ERROR CHECKING?
+    System.out.println("received: " + this.toXML());
 }
 
 /*
@@ -370,7 +371,7 @@ public String toXML() throws KVException {
 			KVMessage ioError = new KVMessage("error in sendMessage "+ e.getMessage());
 			throw new KVException (ioError);
 		}
-		
+		System.out.println("sent: " + xml);
 		try {
 			sock.shutdownOutput();
 		} catch (IOException e) {

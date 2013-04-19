@@ -136,7 +136,7 @@ public class KVCache implements KeyValueInterface {
 			
 			//Check if the key matches
 			//Assuming "==" matches the string characters
-			if(entry.key == key){
+			if(entry.key.equals(key)){
 				entry.value = value;
 				entry.useBit = false;
 				found = true;
@@ -203,7 +203,7 @@ public class KVCache implements KeyValueInterface {
 		
 		for(int i = 0; i < kvSet.size(); i++){
 			entry = kvSet.get(i);
-			if(entry.key == key){
+			if(entry.key.equals(key)){
 				kvSet.remove(i);
 				break;
 			}

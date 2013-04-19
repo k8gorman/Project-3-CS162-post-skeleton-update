@@ -48,8 +48,8 @@ public class Client {
 			kc.put(three, seven);
 			System.out.println("ok");
 
-			System.out.println("putting (3, 7) (again)");
-			kc.put(three, seven);
+			System.out.println("putting (3, 9)");
+			kc.put(three, "9");
 			System.out.println("ok");
 			
 			System.out.println("getting key=3");			

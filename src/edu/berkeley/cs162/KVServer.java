@@ -132,6 +132,7 @@ public class KVServer implements KeyValueInterface {
 
 		// TODO: implement me
 		try{
+			dataStore.get(key);
 			dataStore.del(key);
 		} catch (KVException e){
 			AutoGrader.agKVServerDelFinished(key);
