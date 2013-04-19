@@ -75,7 +75,7 @@ public class KVClient implements KeyValueInterface {
 	    //return the socket
 	    Socket toReturnSock = null;
 		try {
-			toReturnSock = new Socket(server, port);
+			toReturnSock = new Socket(this.server, this.port);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -88,6 +88,7 @@ public class KVClient implements KeyValueInterface {
 			return toReturnSock;
 		else throw new KVException (new KVMessage("Error: cannot connect to host"));
 	}
+	
 	private void closeHost(Socket sock) throws KVException {
 	    // TODO: Implement Me!
 	    try{
@@ -111,14 +112,15 @@ public class KVClient implements KeyValueInterface {
 	    	
 	    	//Checkout the Response
 	    	KVMessage response = null;
-	    	
+	    	InputStream is = null;
 	    	try {
-				response = new KVMessage(sock.getInputStream());
+	    		is = sock.getInputStream();
+				response = new KVMessage(is);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 	    	
-	    	if(response.getMessage() == "IO Error"){
+	    	if(response.getMessage().equals("IO Error")){
 	    		throw new KVException(response);
 	    	}
 	    }
@@ -140,14 +142,15 @@ public class KVClient implements KeyValueInterface {
 	    	
 	    	//Checkout the Response
 	    	KVMessage response = null;
-	    	
+	    	InputStream is = null;
 	    	try {
-				response = new KVMessage(sock.getInputStream());
+	    		is = sock.getInputStream();
+				response = new KVMessage(is);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 	    	
-	    	if(response.getMessage() == "Does not exist"){
+	    	if(response.getMessage().equals("Does not exist")){
 	    		throw new KVException(response);
 	    	}
 	    	
@@ -172,13 +175,15 @@ public class KVClient implements KeyValueInterface {
 	    	
 	    	//Checkout the Response
 	    	KVMessage response = null;
+	    	InputStream is = null;
 	    	try {
-				response = new KVMessage(sock.getInputStream());
+	    		is = sock.getInputStream();
+				response = new KVMessage(is);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 	    	
-	    	if(response.getMessage() == "Does not exist"){
+	    	if(response.getMessage().equals("Does not exist")){
 	    		throw new KVException(response);
 	    	}
 	    }

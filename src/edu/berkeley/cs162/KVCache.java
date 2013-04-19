@@ -30,9 +30,16 @@
  */
 package edu.berkeley.cs162;
 
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Scanner;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
+
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
 
 
 /**
@@ -242,9 +249,47 @@ public class KVCache implements KeyValueInterface {
 		return Math.abs(key.hashCode()) % numSets;
 	}
 	
-    public String toXML() {
-        // TODO: Implement Me!
-        return null;
+    public String toXML() throws Exception{
+
+        XMLOutputFactory factory = XMLOutputFactory.newInstance();
+     	XMLStreamWriter writer = factory.createXMLStreamWriter(new FileWriter("cachedump.xml"));
+		writer.writeStartDocument();
+		writer.writeStartElement("KVCache");
+		int i = 0;
+		while (i < cacheSet.length) {
+			i++;
+			LinkedList<cacheEntry> listentries = cacheSet[i];
+			
+			writer.writeStartElement("Set");
+			writer.writeAttribute("Id", Integer.toString(i));
+			Iterator<cacheEntry> entries = listentries.iterator();
+			while (entries.hasNext()) {
+				String refd = "false";
+				cacheEntry curr = entries.next();
+   				if (curr.useBit) {
+					refd = "true";
+				}
+			writer.writeStartElement("CacheEntry");
+			writer.writeAttribute("isReferenced", refd);
+			writer.writeAttribute("isValid", "true");
+			writer.writeStartElement("Key");
+			writer.writeCharacters(curr.key);
+			writer.writeEndElement();
+			writer.writeStartElement("Value");
+			writer.writeCharacters(curr.value);
+			writer.writeEndElement();
+			writer.writeEndElement();
+			}
+			writer.writeEndElement();
+		}
+		
+		writer.writeEndElement();
+
+     		writer.flush();
+     		writer.close();
+		FileInputStream cachedump = new FileInputStream("cachedump.xml");
+		String toxml = new Scanner( cachedump ).useDelimiter("\\A").next();
+		return toxml;
     }
     
 
