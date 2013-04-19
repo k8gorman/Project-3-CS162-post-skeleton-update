@@ -30,6 +30,7 @@
  */
 package edu.berkeley.cs162;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -106,10 +107,11 @@ public class KVClientHandler implements NetworkHandler {
 					msg = new KVMessage("resp","Success");
 				} catch (KVException e1) {
 					// TODO Auto-generated catch block
-					e1.printStackTrace();
+					//e1.printStackTrace();
 				}
 				
 		    	try {
+		    		System.out.println(msg.toXML());
 					msg.sendMessage(client);
 				} catch (KVException e) {
 					// TODO Auto-generated catch block
@@ -175,6 +177,7 @@ public class KVClientHandler implements NetworkHandler {
 			this.client = client;
 		}
 	}
+	
 	
 	/* (non-Javadoc)
 	 * @see edu.berkeley.cs162.NetworkHandler#handle(java.net.Socket)

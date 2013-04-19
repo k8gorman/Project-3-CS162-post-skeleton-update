@@ -49,8 +49,6 @@ public class SocketServer {
 	public SocketServer(String hostname, int port) {
 		this.hostname = hostname;
 		this.port = port;
-		
-		
 		this.serverRun = true;
 	}
 	
@@ -73,6 +71,7 @@ public class SocketServer {
 			Socket client = null;
 			try{
 				client = server.accept();
+				System.out.println("Accepted Client Connection");
 			} catch (IOException e){
 				throw e;
 			}

@@ -29,9 +29,26 @@
  *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  *  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+
 package edu.berkeley.cs162;
 import java.util.Dictionary;
 import java.util.Hashtable;
+
+
+import java.io.IOException;
+import java.io.FileWriter;
+import java.util.*;
+
+import javax.xml.*;
+
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamWriter;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
 
 
 /**
@@ -107,8 +124,35 @@ public class KVStore implements KeyValueInterface {
         return null;
     }        
 
-    public void dumpToFile(String fileName) {
-        // TODO: implement me
+
+
+
+    public void dumpToFile(String fileName) throws Exception{
+       	XMLOutputFactory factory = XMLOutputFactory.newInstance();
+	
+     	XMLStreamWriter writer = factory.createXMLStreamWriter(new FileWriter(fileName));
+		writer.writeStartDocument();
+		writer.writeStartElement("KVStore");
+		Enumeration<String> thekeys = store.keys();
+		while (thekeys.hasMoreElements()) {
+			String key = thekeys.nextElement();
+			String val = get(key);
+
+     		writer.writeStartElement("KVPair");
+			writer.writeStartElement("Key");
+			writer.writeCharacters(key);
+			writer.writeEndElement();
+			writer.writeStartElement("Value");
+			writer.writeCharacters(val);
+			writer.writeEndElement();
+			writer.writeEndElement();
+		}
+		
+		writer.writeEndElement();
+
+     		writer.flush();
+     		writer.close();
+
     }
 
     /**
@@ -116,7 +160,35 @@ public class KVStore implements KeyValueInterface {
      * written by dumpToFile; the previous contents of the store are lost.
      * @param fileName the file to be read.
      */
-    public void restoreFromFile(String fileName) {
-        // TODO: implement me
+    public void restoreFromFile(String fileName) throws IOException, SAXException, ParserConfigurationException, KVException {
+	KVParser kvpars = new KVParser();
+	ArrayList<KeyValue> somekvs = kvpars.kvs(fileName);
+	Iterator<KeyValue> it = somekvs.iterator();
+       while (it.hasNext()) {
+		KeyValue somekv = (KeyValue) it.next();
+		put(somekv.getKey(), somekv.getValue());
+	}
+
+	}
+
+    /*
+	public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException, KVException, Exception{
+
+		KVStore storetest = new KVStore();
+		storetest.put("Alex", "Kim");
+		storetest.put("Steven", "Pham");
+		storetest.put("Rachel", "Wu");
+		storetest.put("Kate", "Gorman");
+		storetest.dumpToFile("partners.xml");
+		KVStore store2 = new KVStore();
+		store2.restoreFromFile("partners.xml");
+		store2.dumpToFile("partners2.xml");
+		
+	}
+
+	*/
+		
+	
+	  
     }
-}
+

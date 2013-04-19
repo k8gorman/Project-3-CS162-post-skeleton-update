@@ -97,7 +97,7 @@ public class KVClient implements KeyValueInterface {
 			new KVException (new KVMessage("Error: cannot close socket"));
 		}
 	}
-	
+	 
 	public void put(String key, String value) throws KVException {
 	    // TODO: Implement Me!
 
@@ -115,7 +115,7 @@ public class KVClient implements KeyValueInterface {
 	    	try {
 				response = new KVMessage(sock.getInputStream());
 			} catch (IOException e) {
-				e.printStackTrace();
+				//e.printStackTrace();
 			}
 	    	
 	    	if(response.getMessage() == "IO Error"){

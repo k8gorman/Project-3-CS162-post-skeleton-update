@@ -32,9 +32,11 @@
 package edu.berkeley.cs162;
 
 
+import java.io.ByteArrayOutputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -171,6 +173,14 @@ public KVMessage(InputStream input) throws KVException {
 	Document newDoc= null; 
 	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
     DocumentBuilder db;
+    
+    try {
+		System.out.println(input.available());
+	} catch (IOException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
+    
     //CREATE A NEW DOCUMENT BUILDER
     try {
     	db = dbf.newDocumentBuilder();
@@ -178,7 +188,7 @@ public KVMessage(InputStream input) throws KVException {
     	KVMessage errorMsg = new KVMessage("resp", "Unknown Error: DocumentBuilder");;
     	throw new KVException (errorMsg);
     }
-     
+    System.out.println();
     //TRY TO PARSE THE INPUT STREAM
     try{
     	newDoc = db.parse(new NoCloseInputStream(input));
@@ -220,17 +230,16 @@ public KVMessage(InputStream input) throws KVException {
 * 
 */
 public String findTagsOfElement (Element thisElm, String tag){
-NodeList thisList = thisElm.getElementsByTagName(tag);
-if (thisList.getLength() == 0){
-return null;
+	NodeList thisList = thisElm.getElementsByTagName(tag);
+	if (thisList.getLength() == 0){
+		return null;
 
-}
-else{
-//get the children of the first node
-NodeList node1ChildList = thisList.item(0).getChildNodes();
-Node firstChild = (Node) node1ChildList.item(0);
-return firstChild.getNodeValue();
-}
+	} else{
+	//get the children of the first node
+	NodeList node1ChildList = thisList.item(0).getChildNodes();
+	Node firstChild = (Node) node1ChildList.item(0);
+	return firstChild.getNodeValue();
+	}
 }
 
 /**
@@ -239,9 +248,6 @@ return firstChild.getNodeValue();
 * @throws KVException if not enough data is available to generate a valid KV XML message
 */
 public String toXML() throws KVException {
-	String xmlString;
-	Text text;
-	     
 	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 	DocumentBuilder db = null;
 	Document newDoc = null; 
@@ -359,25 +365,21 @@ public String toXML() throws KVException {
 	public void sendMessage(Socket sock) throws KVException {
 	      // TODO: implement me
 		String xml = this.toXML();
-		Writer output;
+		Writer output = null;
 		//check if sock is bound.
 		try{
 			output = new OutputStreamWriter(sock.getOutputStream());
 			output.write(xml);
 			output.flush();
+			sock.shutdownOutput();
 		}catch(IOException e){
 			//KVMessage
 			KVMessage ioError = new KVMessage("error in sendMessage "+ e.getMessage());
 			throw new KVException (ioError);
 		}
 		
-		try {
-			sock.shutdownOutput();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			KVMessage socketError = new KVMessage("socket closure error "+ e.getMessage());
-			throw new KVException(socketError);
-			
-		}
+		System.out.println("Sent: " + xml);
+		
+		//out.println("After");
 	}
 }
