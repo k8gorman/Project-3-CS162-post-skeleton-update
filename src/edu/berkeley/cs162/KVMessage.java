@@ -74,6 +74,7 @@ private String key = null;
 private String value = null;
 private String status = null;
 private String message = null;
+public boolean closed;
 //array list used to check for valid type
 ArrayList<String> msgTypes= new ArrayList<String>(Arrays.asList(
 "putreq",
@@ -129,14 +130,34 @@ public String getMsgType() {
 return msgType;
 }
 
+public boolean isClosed(){
+	return closed;
+}
+
+
+
 
 /* Solution from http://weblogs.java.net/blog/kohsuke/archive/2005/07/socket_xml_pitf.html */
 private class NoCloseInputStream extends FilterInputStream {
-    public NoCloseInputStream(InputStream in) {
+    
+	public NoCloseInputStream(InputStream in) {
         super(in);
+        closed = false;
     }
    
     public void close() {} // ignore close
+    
+    public void reallyClose(){
+    	try {
+			super.close();
+			closed = true;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+
+	
 }
 
 /***
@@ -178,10 +199,10 @@ try {
 	KVMessage errorMsg = new KVMessage("resp", "Unknown Error: DocumentBuilder");;
 	throw new KVException (errorMsg);
 }
-
+NoCloseInputStream noCloseInput = new NoCloseInputStream(input);
 //TRY TO PARSE THE INPUT STREAM
 try{
-	newDoc = db.parse(new NoCloseInputStream(input));
+	newDoc = db.parse(noCloseInput);
 	newDoc.setXmlStandalone(true);
 }catch(IOException e){
 	KVMessage ioError = new KVMessage( "resp" , "Network Error: Could not receive data");
@@ -248,7 +269,9 @@ try{
     	//wrong message type
     	throw new KVException(new KVMessage("resp", "XML Error: Received unparseable message"));
     }
-    		
+    //ADDED
+    noCloseInput.reallyClose();
+    
   /*  //NORMALIZE THE UNDERLYING DOM TREE
     // used this website as a resource: http://sanjaal.com/java/tag/getdocumentelementnormalize/
     newDoc.getDocumentElement().normalize();

@@ -38,6 +38,9 @@ public class KVMessageTest {
 		InputStream is = new ByteArrayInputStream(str.getBytes());
 		KVMessage inputtest = new KVMessage(is);
 		assertTrue(inputtest.getKey().equals("kittykat"));
+		assertTrue(inputtest.isClosed() == true);
+		System.out.println("closed: " + inputtest.isClosed());
+		System.out.println(inputtest.getKey());
 	}
 	/*
 	 * test a bad message type to make sure the test is correct for this
@@ -48,11 +51,12 @@ public class KVMessageTest {
 			String str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><KVMessage type=\"meoww\"><Key>boba</Key></KVMessage>";
 			InputStream is = new ByteArrayInputStream(str.getBytes());
 			KVMessage inputtest2 = new KVMessage(is);
-			System.out.println(inputtest2.getKey());
+			
 		}
 		catch (KVException e){
 			assertTrue(e.getMsg().getMsgType().equals("resp"));
 			assertTrue(e.getMsg().getMessage().equals("XML Error: Received unparseable message"));
+			
 		}
 
 
