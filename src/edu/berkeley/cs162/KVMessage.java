@@ -325,6 +325,7 @@ return firstChild.getNodeValue();
 public String toXML() throws KVException {
 String xmlString;
 Text text;
+KVMessage xmlError =new KVMessage("resp", "XML Error: Received unparseable message");
      
 DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 DocumentBuilder db = null;
@@ -417,8 +418,7 @@ Transformer arnold = null;
 try{
 arnold = tf.newTransformer();
 }catch (TransformerConfigurationException e){
-KVMessage transformerError = new KVMessage("make new transformer error: "+ e.getMessage());
-throw new KVException(transformerError);
+throw new KVException(xmlError);
 }
 
 
@@ -432,8 +432,7 @@ DOMSource src = new DOMSource(newDoc);
 try{
 arnold.transform(src, dst);
 }catch (TransformerException e){
-KVMessage transError = new KVMessage ("error converting xml src to dst" + e.getMessage());
-throw new KVException(transError);
+throw new KVException(xmlErrors);
 }
 //get the string from the string writer
 return stringwriter.toString();
@@ -450,7 +449,7 @@ output.write(xml);
 output.flush();
 }catch(IOException e){
 //KVMessage
-KVMessage ioError = new KVMessage("error in sendMessage "+ e.getMessage());
+KVMessage ioError = new KVMessage("resp", "Network Error: Could not send data");
 throw new KVException (ioError);
 }
 
@@ -458,7 +457,7 @@ try {
 sock.shutdownOutput();
 } catch (IOException e) {
 // TODO Auto-generated catch block
-KVMessage socketError = new KVMessage("socket closure error "+ e.getMessage());
+KVMessage socketError = new KVMessage("resp", "Network Error: Could not send data");
 throw new KVException(socketError);
 
 }
