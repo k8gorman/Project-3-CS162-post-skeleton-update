@@ -162,4 +162,9 @@ public class KVServer implements KeyValueInterface {
 		else
 			return null;
 	}
+	public boolean hasKey (String key) throws KVException {
+		// TODO: optional implement me
+		
+		return false;
+	}
 }

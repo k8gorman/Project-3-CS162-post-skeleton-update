@@ -1,3 +1,4 @@
+package edu.berkeley.cs162;
 
 import static org.junit.Assert.*;
 
@@ -8,8 +9,6 @@ import java.io.InputStream;
 
 import org.junit.Test;
 
-import edu.berkeley.cs162.KVException;
-import edu.berkeley.cs162.KVMessage;
 
 
 

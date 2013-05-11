@@ -66,9 +66,7 @@ public class KVClientHandler implements NetworkHandler {
 		private Socket client = null;
 		
 		@Override
-		public void run() {
-		     // TODO: Implement Me!
-			
+		public void run() {			
 		    //Check if mesgType is valid
 		    KVMessage clientMessage = null;
 		    try{

@@ -1,8 +1,8 @@
+package edu.berkeley.cs162;
 import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import edu.berkeley.cs162.ThreadPool;
 
 
 public class ThreadPoolTest {
